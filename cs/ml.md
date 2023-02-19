@@ -79,9 +79,7 @@ $$
 f(x)=\sum^n_{i=1}softmax(-\frac{1}{2}((x-x_i)w)^2)y_i
 $$
 
-# Transformer
-
-# Bert
+# 带权重的方法
 
 $$
 n = f(l,w)\\
@@ -90,8 +88,18 @@ c = g(f(l,w),e)\\
 c = h(l,w,e)\\
 C_{b,3} = E_{b,768}(L_{3,1356}W_{1356,768})^T\\
 loss = CE(True_{b,3},softmax(C_{b,3}))\\
-softmax(C_{b,3})_{i,j} = p(y=j|C_i) = \frac{e^{C_i^TW_j}}{\sum^K_{k=1}e^{C_i^TW_k}}\\
-CE(True, Pred) = -\frac{1}{b}\sum_{i=1...b}\sum_{j=1,2,3}True_{i,j}logPred_{i,j}\\
 求：
 \frac{\partial loss}{\partial w} = \frac{\partial loss}{\partial c}\frac{\partial c}{\partial n}\frac{\partial n}{\partial w}\\
 $$
+
+$$
+softmax(C_{b,3})_{i,j} = p(y=j|C_i) = \frac{e^{C_i^TW_j}}{\sum^K_{k=1}e^{C_i^TW_k}}\\
+CE(True, Pred) = -\frac{1}{b}\sum_{i=1...b}\sum_{j=1,2,3}True_{i,j}logPred_{i,j}\\
+$$
+
+# 对比学习
+
+$$
+a
+$$
+
