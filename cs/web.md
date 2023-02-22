@@ -1,8 +1,41 @@
 # Java
 
-## lambda
+[oracle java doc](https://docs.oracle.com/javase/specs/index.html)
 
+## 面向对象
+
+### 方法的 overload 和 override
+
+方法签名（method signature）：一般指方法的名字和参数列表
+
+`overload`方法名相同，但是参数不同，返回值也可以不同
+`override`通常在继承时发生，方法名相同，参数列表相同，返回值也必须相同
+
+## 函数式编程	
+
+### 函数式接口 FunctionalInterface
+
+```java
+//1. 函数式接口：只包含一个抽象方法，不包括default和static方法
+@FunctionalInterface
+interface ILike {
+    void lambda();
+}
 ```
+
+`FunctionalInterface`允许传入：
+
+* 接口的实现类（传统写法，代码较繁琐）；
+* Lambda表达式（只需列出参数名，由编译器推断类型）；
+* 符合方法签名的静态方法；
+* 符合方法签名的实例方法（实例类型被看做第一个参数类型）；
+* 符合方法签名的构造方法（实例类型被看做返回类型）。
+
+`FunctionalInterface`**不强制继承关系**，不需要方法名称相同，只要求方法参数（类型和数量）与方法返回类型相同，即认为**方法签名相同**。
+
+### lambda
+
+```java
 package cn.quaeast;
 
 //函数式接口的各种实现方法
@@ -49,7 +82,8 @@ public class TestLambda {
     }
 }
 
-//1. 函数式接口：一个方法只包括一个接口
+//1. 函数式接口：只包含一个抽象方法，不包括default和static方法
+@FunctionalInterface
 interface ILike {
     void lambda();
 }
@@ -62,6 +96,69 @@ class Like implements ILike {
     }
 }
 ```
+
+### 方法引用
+
+```java
+ClassName::methodName
+ClassName::new //构造方法引用
+```
+
+## 设计模式
+
+设计模式包括：
+
+* 创建型模式
+* 结构型模式
+* 行为型模式
+
+
+### 开闭原则（Open Closed Principle）：OOP基本
+
+软件应该对扩展开放，而对修改关闭。
+
+### 里氏替换原则（Barbara Liskov）：OOP基本	
+
+任何基类可以出现的地方，子类一定可以出现。即如果我们调用一个父类的方法可以成功，那么替换成子类调用也应该完全可以运行。
+
+这里其实也符合开闭原则，子类只对父类的延伸，拥有父类包括的一切能力。这一点在Java中需要注意，声明对应的类型并不会改变对象的行为。
+
+```java
+package cn.quaeast;
+
+class Father{
+    public String hello(){
+        return "Fhello";
+    }
+}
+
+class Son extends Father {
+    public String hello(){
+        return "Shello";
+    }
+}
+
+public class TestPC {
+    public static void main(String[] args) {
+        //声明对应的类型并不会改变对象的行为
+        Father f = new Father();
+        System.out.println(s.hello());//Fhellp
+        f = new Son();
+        System.out.println(s.hello());//Shellp
+    }
+}
+```
+
+### 工厂方法（Factory Method）：创建型模式
+
+定义一个用于创建对象的接口，让子类决定实例化哪一个类。Factory Method使一个类的实例化**延迟到其子类**。
+
+实际上大多数情况下我们并不需要抽象工厂，而是通过**静态方法**直接返回产品。这种简化的使用静态方法创建产品的方式称为**静态工厂方法（Static Factory Method）**。
+
+```java
+List<String> list = List.of("A", "B", "C"); //静态工厂方法
+```
+
 
 ## Java 多线程基础
 
@@ -252,6 +349,41 @@ thread.setDaemon(boolean);
 
 ### 锁
 
+#### synchronized
+
+`synchronized`关键词可以作为方法的关键字用于锁住该类的`this`，如果是**静态**方法则锁住该类`class`。
+
+```java
+class MyClass {
+    synchronized void myMethod(){}
+    
+    synchronized static void myStaticMethod(){}
+    
+    void myMethod2(){
+        synchronized(this){}
+    }
+}
+```
+
+#### lock
+
+```java
+public class TestLock {
+    private final ReentrantLock lock = new ReentrantLock();
+
+    public void add(int n) {
+        lock.lock();
+        try {
+            for (int i = 0; i < n; i++) {
+                balance = balance + 1;
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
 #### 死锁
 
 并发下，线程因为相互等待对方资源，导致“永久”阻塞的现象。
@@ -286,14 +418,20 @@ jstack <pid>
 
 ### 生产者和消费者: Object的Wait()
 
-生产者和消费者问题中，仅有Synchronized是不够的
+生产者和消费者问题是指生产者和消费者共享用一个资源，并且生产者和消费者之间相互依赖互为条件。
 
-```
+* 对于生产者，没有生产产品之前，要通知消费者等待。而生产了产品之后，又需要马上通知消费者消费
+* 对于消费者，在消费之后，要通知生产者已经结束消费，需要生产新的产品以供消费
+* 在生产者消费者问题中，**仅有synchronized是不够的**
+    * synchronized 可阻止并发更新同一个共享资源，实现了同步
+    * synchronized 不能用来实现不同线程之间的消息传递 （通信）
+
+```java
+//一下方法只能在同步方法或同步代码块中使用，否则会抛出IllegalMonitorStateException
 object.wait()
 object.wait(long timeout)
 object.notify()
 object.notifyall()
-
 ```
 
 
