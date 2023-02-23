@@ -104,20 +104,43 @@ ClassName::methodName
 ClassName::new //构造方法引用
 ```
 
+## 注解
+
+> 什么是注解（Annotation）？注解是放在Java源码的类、方法、字段、参数前的一种特殊“注释”
+
+定义一个注解时，还可以定义配置参数。配置参数可以包括：
+
+* 所有基本类型；
+* String；
+* 枚举类型；
+* 基本类型、String、Class以及枚举的数组。
+
+```java
+@Inherited
+@Repeatable(Reports.class)
+@Retention(RetentionPolicy.RUNTIME)//默认为class，通常需要声明
+@Target(ElementType.METHOD)
+public @interface Report {
+    int type() default 0;
+    String level() default "info";
+    String value() default "";
+}
+```
+
+
 ## 设计模式
 
 设计模式包括：
 
-* 创建型模式
-* 结构型模式
-* 行为型模式
+* **创建型模式**：创建型模式关注点是如何创建对象，其核心思想是要把对象的创建和使用相分离，这样使得两者能相对独立地变换
+* **结构型模式**：
+* **行为型模式**：
 
-
-### 开闭原则（Open Closed Principle）：OOP基本
+#### 开闭原则（Open Closed Principle）
 
 软件应该对扩展开放，而对修改关闭。
 
-### 里氏替换原则（Barbara Liskov）：OOP基本	
+#### 里氏替换原则（Barbara Liskov）
 
 任何基类可以出现的地方，子类一定可以出现。即如果我们调用一个父类的方法可以成功，那么替换成子类调用也应该完全可以运行。
 
@@ -149,15 +172,85 @@ public class TestPC {
 }
 ```
 
-### 工厂方法（Factory Method）：创建型模式
+#### 工厂方法（Factory Method）：创建型模式
 
-定义一个用于创建对象的接口，让子类决定实例化哪一个类。Factory Method使一个类的实例化**延迟到其子类**。
+>  定义一个用于创建对象的接口，让子类决定实例化哪一个类。Factory Method使一个类的实例化**延迟到其子类**。
 
 实际上大多数情况下我们并不需要抽象工厂，而是通过**静态方法**直接返回产品。这种简化的使用静态方法创建产品的方式称为**静态工厂方法（Static Factory Method）**。
 
 ```java
 List<String> list = List.of("A", "B", "C"); //静态工厂方法
 ```
+
+#### 抽象工厂（Abstract Factory）：创建型模式
+
+> 提供一个创建一系列相关或相互依赖对象的接口，而无需指定它们具体的类。
+
+定义抽象的接口：
+
+```java
+public interface AbstractFactory {
+    // 创建Html文档:
+    HtmlDocument createHtml(String md);
+    // 创建Word文档:
+    WordDocument createWord(String md);
+}
+
+// Html文档接口:
+public interface HtmlDocument {
+    String toHtml();
+    void save(Path path) throws IOException;
+}
+
+// Word文档接口:
+public interface WordDocument {
+    void save(Path path) throws IOException;
+}
+```
+
+实现抽象接口：
+
+```java
+public interface AbstractFactory {
+    public static AbstractFactory createFactory(String name) {
+        if (name.equalsIgnoreCase("fast")) {
+            return new FastFactory();
+        } else if (name.equalsIgnoreCase("good")) {
+            return new GoodFactory();
+        } else {
+            throw new IllegalArgumentException("Invalid factory name");
+        }
+    }
+}
+```
+
+#### 生成器（Builder）：创建型模式
+
+> 将一个复杂对象的构建与它的表示分离（我认为应该翻译成把复杂对象构建的表示分离），使得同样的构建过程可以创建不同的表示。
+
+```java
+String url = URLBuilder.builder() // 创建Builder
+        .setDomain("www.liaoxuefeng.com") // 设置domain
+        .setScheme("https") // 设置scheme
+        .setPath("/") // 设置路径
+        .setQuery(Map.of("a", "123", "q", "K&R")) // 设置query
+        .build(); // 完成build
+        
+```
+
+#### 原型（Prototype）：创建型模式
+
+> 用原型实例指定创建对象的种类，并且通过拷贝这些原型创建新的对象。
+
+在 JavaScript 中常见
+
+#### 单例（Singleton）：创建型模式
+
+> 保证一个类仅有一个实例，并提供一个访问它的全局访问点。
+
+在Java中一般使用约定的形式而不主动约束
+
+#### 结构型模式
 
 
 ## Java 多线程基础
