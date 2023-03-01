@@ -119,13 +119,17 @@ ClassName::new //构造方法引用
 @Inherited
 @Repeatable(Reports.class)
 @Retention(RetentionPolicy.RUNTIME)//默认为class，通常需要声明
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD,ElementType.TYPE)})
 public @interface Report {
     int type() default 0;
     String level() default "info";
-    String value() default "";
+    String value() default ""; //如果只有一个字段通常使用value，这样在使用时可以省略字段名
 }
 ```
+
+## 反射
+
+
 
 
 ## 设计模式
@@ -531,6 +535,26 @@ object.notifyall()
 
 # Mysql
 
+## SQL 语法
+
+### 执行顺序
+
+| 执行顺序 | 书写顺序                  |
+| -------- | ------------------------- |
+| 8        | SELECT                    |
+| 9        | DISTINCT                  |
+| 1        | FROM left_table           |
+| 3        | <join\> right_table       |
+| 2        | ON <join_condition\>      |
+| 4        | WHERE <condition\>        |
+| 5        | GROUP BY <group_list\>    |
+| 6        | WITH cube\|rollup         |
+| 7        | HAVING <having_condition> |
+| 10       | ORDER BY <orderby_list>   |
+| 11       | LIMIT <limit_number>      |
+
+
+
 ## 事务
 
 **事务的隔离级别 ACID**：
@@ -542,9 +566,65 @@ object.notifyall()
 
 **事务隔离级别**：
 
-* read uncommit: 脏读
-* read commit: 不可重复读（oracle默认）
-* repeatable read: 幻读（mysql默认）
+* read uncommit: 脏读。rollback情况会出现
+* read commit: 不可重复读（oracle默认）。在一个事务中，数据发生改变，UPDATE
+* repeatable read: 幻读（mysql默认，innodb使用了间隙锁所以不存在幻读）。在一个事务中，数据量发生变化，INSERT、DELETE
 * serializable: 上面的问题全部解决
 
-隔离性由SQL的各种锁和MVCC机制实现。、
+隔离性由SQL的各种锁和MVCC机制实现。
+
+### MVCC（Multiversion concurrency control）多版本并发控制
+
+RC、RR基于MVCC
+
+# Git
+
+### git rebase
+
+```shell
+git rebase [<upstream> [<branch>]
+```
+
+原分支
+
+```shell
+          A---B---C topic
+         /
+    D---E---F---G master
+```
+在`topic`分支执行命令后
+```shell
+git rebase master
+git rebase master topic
+```
+
+```shell
+                  A'--B'--C' topic
+                 /
+    D---E---F---G masters
+```
+
+### git merge
+
+```shell
+git merge [--into-name <branch>] [<commit>…]
+```
+
+原分支：
+
+```shell
+         A---B---C topic
+        /
+    D---E---F---G master
+```
+在`master`分支执行命令后：
+
+```shell
+git merge topic
+```
+
+```shell
+          A---B---C topic
+         /         \
+    D---E---F---G---H master
+```

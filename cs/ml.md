@@ -1,8 +1,22 @@
+# torch
+
+​	
+
+# 正则化
+
 dropout在线性模型中和L2正则项等价
 
 L2正则项和
 
-# Self-Attention
+# Attention
+
+**self_attention：** 表示Q,K,V来源于同一个地方
+
+**cross_attention：**表示Q 与 K,V 来源于不同的地方
+
+**[multihead attention：](https://finisky.github.io/2020/05/25/multiheadattention/)：**如图所示，所谓Multi-Head Attention其实是把QKV的计算并行化，原始attention计算d_model维的向量，而Multi-Head Attention则是将d_model维向量先经过一个Linear Layer，再分解为h个Head计算attention，最终将这些attention向量连在一起后再经过一层Linear Layer输出。所以在整个过程中需要4个输入和输出维度都是d_model的Linear Layer，而整个Model的输入是(batch_size, seq_length, d_model)，输出也是(batch_size, seq_length, d_model)。
+
+![attention](/Users/fang/Desktop/cookbook/cs/img/multihead-attention.jpeg)
 
 ## Attention的计算方法
 
@@ -16,7 +30,7 @@ k^i=W^ka^i\\
 v^i=W^va^i
 $$
 
-注意力$\alpha$计算方法：
+注意力$\alpha$（标量）计算方法：
 
 $$
 \alpha_{i,j}=q^i\cdot k^j
@@ -79,6 +93,36 @@ $$
 f(x)=\sum^n_{i=1}softmax(-\frac{1}{2}((x-x_i)w)^2)y_i
 $$
 
+```python
+import torch
+import torch.nn as nn
+
+
+class Att(nn.Module):
+    def __init__(self, hidden_size):
+        super(Att, self).__init__()
+        self.hidden_size = hidden_size
+        self.query = nn.Linear(hidden_size, hidden_size)
+        self.key = nn.Linear(hidden_size, hidden_size)
+        self.value = nn.Linear(hidden_size, hidden_size)
+        self.softmax = nn.Softmax(dim=-1)
+
+    def forward(self, inputs):
+        Q = self.query(inputs)
+        K = self.key(inputs)
+        V = self.value(inputs)
+        att = torch.einsum('iqe,ike->iqk', Q, K) / torch.sqrt(torch.tensor(self.hidden_size))
+        att = self.softmax(att)
+        out = torch.einsum('iqk,ike->iqe', att, V)
+        return out
+
+if __name__ == '__main__':
+    att = Att(768)
+    inputs = torch.randn(2, 3, 768)
+    out = att(inputs)
+    print(out.shape)
+```
+
 # 带权重的方法
 
 $$
@@ -97,9 +141,13 @@ softmax(C_{b,3})_{i,j} = p(y=j|C_i) = \frac{e^{C_i^TW_j}}{\sum^K_{k=1}e^{C_i^TW_
 CE(True, Pred) = -\frac{1}{b}\sum_{i=1...b}\sum_{j=1,2,3}True_{i,j}logPred_{i,j}\\
 $$
 
-# 对比学习
+# 多模态
 
-$$
-a
-$$
+> 不同空间下的表示可以做attention吗？(ViLBert)
+>
+> 可以，但不好。
+>
+> 把不同模态的特征映射到相同的向量空间的操作叫align。代表作是OpenAI的CLIP，Google的Align。用一个模型把不同模态的特征混在一起用来完成某项任务，叫做Fuse。代表作有微软的UNITER，OSCAR等。
+> 
+> UNITER一类Fuse模型都是对尚未align的vision和text特征作cross attention，事实证明了其可行性。Transformer的线性层可以学习向量的空间变换。但相同的网络，如果用align好的特征再去fuse，是不是模型的训练更容易？结论是肯定的。可以参考Salesforce的论文Align Before Fuse，他们处理的就是你提到的这个事，结论是有效果的。
 
