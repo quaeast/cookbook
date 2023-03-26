@@ -1,3 +1,17 @@
+# ssh
+```bash
+# 把服务器能访问到的端口映射到本机
+autossh -M 4004  -N -L 本机地址:本机端口:服务器地址:服务器端口 jump@quaeast.cn -p 6005
+```
+需要修改/etc/ssh/sshd_config，添加：
+
+```
+GatewayPorts yes
+```
+
+```bash
+ssh -D localhost:1080  HostB
+```
 # Tmux
 
 ```bash

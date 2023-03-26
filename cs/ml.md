@@ -1,6 +1,40 @@
-# torch
+# latex
 
-​	
+向量和矩阵加粗：
+
+$$
+\boldsymbol{x}\quad \mathbf{W}\quad \vec{x}
+$$
+
+# 评估指标
+
+**精确率、精度（Precision）**
+
+$$
+Precision=\frac{TP}{TP+FP}
+$$
+
+**召回率（Recall）**
+
+$$
+Recall=\frac{TP}{TP+FN}=\frac{TP}{P}
+$$
+
+**F1**
+
+$$
+F1=\frac{2PR}{P+R}
+$$
+
+# SVM
+
+寻找最佳超平面，最佳超平面的一个合理选择是以最大间隔把两个类分开的超平面。因此，我们要选择能够让到每边最近的数据点的距离最大化的超平面。
+
+![svm](./img/SVM.svg)
+
+核函数
+
+![核方法](/Users/fang/Desktop/cookbook/cs/img/Kernel_Machine.png)
 
 # 正则化
 
@@ -12,11 +46,11 @@ L2正则项和
 
 **self_attention：** 表示Q,K,V来源于同一个地方
 
-**cross_attention：**表示Q 与 K,V 来源于不同的地方
+**cross_attention：** 表示Q 与 K,V 来源于不同的地方
 
-**[multihead attention：](https://finisky.github.io/2020/05/25/multiheadattention/)：**如图所示，所谓Multi-Head Attention其实是把QKV的计算并行化，原始attention计算d_model维的向量，而Multi-Head Attention则是将d_model维向量先经过一个Linear Layer，再分解为h个Head计算attention，最终将这些attention向量连在一起后再经过一层Linear Layer输出。所以在整个过程中需要4个输入和输出维度都是d_model的Linear Layer，而整个Model的输入是(batch_size, seq_length, d_model)，输出也是(batch_size, seq_length, d_model)。
+**[multihead attention：](https://finisky.github.io/2020/05/25/multiheadattention/)：** 如图所示，所谓Multi-Head Attention其实是把QKV的计算并行化，原始attention计算d_model维的向量，而Multi-Head Attention则是将d_model维向量先经过一个Linear Layer，再分解为h个Head计算attention，最终将这些attention向量连在一起后再经过一层Linear Layer输出。所以在整个过程中需要4个输入和输出维度都是d_model的Linear Layer，而整个Model的输入是(batch_size, seq_length, d_model)，输出也是(batch_size, seq_length, d_model)。
 
-![attention](/Users/fang/Desktop/cookbook/cs/img/multihead-attention.jpeg)
+![attention](./img/multihead-attention.jpeg)
 
 ## Attention的计算方法
 
@@ -111,8 +145,10 @@ class Att(nn.Module):
         Q = self.query(inputs)
         K = self.key(inputs)
         V = self.value(inputs)
+        # i 表示batch size，q 表示 query 序列的长度，k 表示 key 序列的长度，e 表示线性变换后的维度
         att = torch.einsum('iqe,ike->iqk', Q, K) / torch.sqrt(torch.tensor(self.hidden_size))
         att = self.softmax(att)
+        # 
         out = torch.einsum('iqk,ike->iqe', att, V)
         return out
 
@@ -141,6 +177,119 @@ softmax(C_{b,3})_{i,j} = p(y=j|C_i) = \frac{e^{C_i^TW_j}}{\sum^K_{k=1}e^{C_i^TW_
 CE(True, Pred) = -\frac{1}{b}\sum_{i=1...b}\sum_{j=1,2,3}True_{i,j}logPred_{i,j}\\
 $$
 
+# 数学
+
+### 排列组合
+
+$$
+C^m_n=\frac{A^m_n}{m!}=\frac{n!}{m!(n-m)!}\\
+C^m_n=C^{n-m}_n
+$$
+
+## 线性代数
+
+### 线性变换
+
+**变换**可以理解成是一个函数，即将原向量 $\boldsymbol{x_i}$ 经过一个函数输出 $\boldsymbol{y_i}$ 。对于线性变换，可以理解成对 $\boldsymbol{x_i}$ 各个维度乘以一个向量，最后求和，展开理解为：
+$$
+\begin{gathered}
+\begin{bmatrix} a & b \\ c & d \end{bmatrix}
+\begin{bmatrix} x \\ y \end{bmatrix}
+=x\begin{bmatrix} a \\ c \end{bmatrix}
++y\begin{bmatrix} b \\ d \end{bmatrix}
+=\begin{bmatrix} ax+by \\ cx+dy \end{bmatrix}
+\end{gathered}
+$$
+
+具体的算法是将一组新的基 $\mathbf{W}=[\boldsymbol{\omega_1}, \boldsymbol{\omega_2},..., \boldsymbol{\omega_n}]$ 对一组向量 $\mathbf{X}=[\boldsymbol{x_1}, \boldsymbol{x_2},..., \boldsymbol{x_n}]$ 进行基变换得到 $\mathbf{Y}=[\boldsymbol{y_1}, \boldsymbol{y_2},..., \boldsymbol{y_n}]$
+
+矩阵乘法的方式表示为：
+
+$$
+\mathbf{Y}=\mathbf{W}\mathbf{X}
+$$
+
+
+### 矩阵运算
+
+哈达马乘积（Hadamard product）约束与加法相同，只是对应元素运算变为乘法。记作 ∘ 或 ∗ 或 ⊙。即对应位置元素乘法。
+
+
+### 对角阵左乘
+
+用对角阵左乘一个矩阵，就是用对角阵的对角元分别乘这个矩阵的对应各行；
+用对角阵右乘一个矩阵，就是用对角阵的对角元分别乘这个矩阵的对应各列。
+
+# 信息论
+
+**信息量：**
+
+假设$X$是一个离散型随机变量，其取值集合为 $\mathcal{X}$ ,概率分布函数$p(x)=Pr(X=x),x∈X$,则定义事件$X=x_0$的信息量为： $I(x_0)=−log(p(x_0))$
+
+**熵：**
+
+熵值越大，不确定性越大
+$$
+H(X)=-\sum_{i=1}^np(x_i)\log(p(x_i))
+$$
+
+**联合熵（joint entropy）**
+
+$$
+H(X,Y)=-\sum_{x\in X}\sum_{y\in Y}p(x,y)\log_2p(x,y)
+$$
+
+$$
+H(X,Y)=H(X)+H(Y|X)
+$$
+
+**条件熵（conditional entropy）**
+$$
+\begin{align*}
+H(Y|X)&=\sum_{x\in X}H(Y|X=x)\\
+&=H(X,Y)-H(X)
+\end{align*}
+$$
+
+
+**相对熵（KL散度）：**
+
+非对称
+$$
+D_{KL}(p||q)=\sum_{i=1}^n{p(x_i)}{\log(\frac{p(x_i)}{q(x_i)})}
+$$
+
+$$
+D_{KL}(p||q)
+$$
+
+**交叉熵：**
+
+$$
+\begin{align*}
+D_{KL}(p||q)&=\sum^n_{i=1}p(x_i)\log(\frac{p(x_i)}{q(x_i)})\\
+&=\sum^n_{i=1}p(x_i)log(p(x_i))-\sum^n_{i=1}p(x_i)\log(q(x_i))\\
+&=-H(p(x))+[-\sum^n_{i=1}p(x_i)\log(q(x_i))]
+\end{align*}
+$$
+
+$$
+H(p,q)=-\sum^n_{i=1}p(x_i)log(q(x_i))
+$$
+
+$$
+H(p,q)=H(p)+D_{KL}(p||q)
+$$
+
+在使用交叉熵作为损失函数的时$p$为**标签**，所以$p$的熵$H(p(x))$是一个**常数**。
+
+**信息增益（Information gain）：**
+
+$A$对于$D$的信息增益为：
+$$
+g(D,A)=H(D)-H(D|A)
+$$
+
 # 多模态
 
 > 不同空间下的表示可以做attention吗？(ViLBert)
@@ -151,3 +300,16 @@ $$
 > 
 > UNITER一类Fuse模型都是对尚未align的vision和text特征作cross attention，事实证明了其可行性。Transformer的线性层可以学习向量的空间变换。但相同的网络，如果用align好的特征再去fuse，是不是模型的训练更容易？结论是肯定的。可以参考Salesforce的论文Align Before Fuse，他们处理的就是你提到的这个事，结论是有效果的。
 
+# 面试问题
+
+### 如何解决长尾问题？
+
+### 交叉熵和KL散度（相对熵）？
+
+### 模型效果不佳如何优化模型？
+
+# Bert
+
+[bert 参数计算](https://github.com/google-research/bert/issues/656)
+
+[bert输出层](https://github.com/huggingface/transformers/issues/7540)
