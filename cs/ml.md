@@ -30,11 +30,13 @@ $$
 
 寻找最佳超平面，最佳超平面的一个合理选择是以最大间隔把两个类分开的超平面。因此，我们要选择能够让到每边最近的数据点的距离最大化的超平面。
 
-![svm](./img/SVM.svg)
+<img src="./img/SVM.svg" alt="svm" style="zoom:5%;" />
 
 核函数
 
 ![核方法](/Users/fang/Desktop/cookbook/cs/img/Kernel_Machine.png)
+
+### KKT 条件
 
 # 正则化
 
@@ -185,6 +187,20 @@ $$
 C^m_n=\frac{A^m_n}{m!}=\frac{n!}{m!(n-m)!}\\
 C^m_n=C^{n-m}_n
 $$
+
+### 贝叶斯公式
+
+$$
+P(Y_i|X)=\frac{P(X|Y_i)P(Y_i)}{\sum_j{P(X|Y_j)P(Y_j)}}
+$$
+
+$P(Y)$是$Y$的先验
+
+$P(Y|X)$是$Y$的后验
+
+贝叶斯公式可以表示为：
+
+$后验概率=标准似然度\times 先验概率$
 
 ## 线性代数
 
